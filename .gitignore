@@ -23,8 +23,14 @@ dist-ssr
 *.sln
 *.sw?
 
+# Local-machine workaround for the "&" in this folder's Windows path — breaks npm on Linux CI
+.npmrc
+
 # Claude Code local tooling state
 .claude/
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+.vercel
+.env*
