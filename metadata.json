@@ -1,0 +1,7 @@
+{
+  "name": "Confort+ — Mobilité premium à Conakry",
+  "description": "Plateforme complète de mise en relation conducteurs/clients avec gestion administrative et paiements mobiles à Conakry (VTC & moto-taxi).",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
