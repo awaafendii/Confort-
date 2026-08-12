@@ -81,7 +81,8 @@ export const MapView: React.FC<MapViewProps> = ({ center, zoom = 13, markers = [
         type: 'line',
         source: ROUTE_SOURCE_ID,
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#0F2A4D', 'line-width': 4, 'line-opacity': 0.85 },
+        // #102A43 = primary-800 (Confort+ design system) — l'ancien hex #0F2A4D datait de WONKHAI.
+        paint: { 'line-color': '#102A43', 'line-width': 4, 'line-opacity': 0.85 },
       });
     });
 

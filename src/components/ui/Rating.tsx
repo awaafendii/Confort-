@@ -31,10 +31,15 @@ export const Rating: React.FC<RatingProps> = ({
           <button
             key={star}
             type="button"
+            role={interactive ? 'radio' : undefined}
+            aria-checked={interactive ? star === Math.round(value) : undefined}
             disabled={!interactive}
             aria-label={`${star} étoile${star > 1 ? 's' : ''}`}
             onClick={() => interactive && onChange?.(star)}
-            className={cn(!interactive && 'pointer-events-none', interactive && 'tap-target')}
+            className={cn(
+              !interactive && 'pointer-events-none',
+              interactive && 'tap-target rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+            )}
           >
             <Star
               width={size}

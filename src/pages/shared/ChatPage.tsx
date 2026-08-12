@@ -1,9 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, Send } from 'lucide-react';
-import { Avatar } from '@/components/ui';
+import { ArrowLeft, MessageCircle, Phone, Send } from 'lucide-react';
+import { Avatar, BackButton, EmptyState, IconButton } from '@/components/ui';
+import { ConversationCard, MessageBubble } from '@/components/business';
 import { useAuthStore } from '@/features/auth/store';
 import { useChatStore } from '@/features/chat/chatStore';
+import { MOCK_DRIVERS_POOL } from '@/data/mockDrivers';
+import { cn } from '@/lib/utils';
+import { formatRelativeTime } from '@/utils/format';
 import type { ChatMessage } from '@/types';
 
 interface ChatState {
@@ -40,19 +44,74 @@ export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const replyTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  const isListMode = !rideId;
+
   useEffect(() => {
-    if (!rideId || !myRole || !account) navigate(-1);
+    if (!account) navigate(-1);
+    // Sans état de course, seul le passager a un historique de conversations à lister
+    // (voir la liste ci-dessous, dérivée par driverId — le chauffeur n'a pas d'équivalent).
+    else if (isListMode && account.role !== 'PASSENGER') navigate(-1);
     return () => clearTimeout(replyTimeout.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const messages = rideId ? (messagesByRide[rideId] ?? []) : [];
+  const lastMessage = messages[messages.length - 1];
+
+  const conversations = useMemo(() => {
+    if (!isListMode) return [];
+    return Object.entries(messagesByRide)
+      .map(([driverId, msgs]) => {
+        const driver = MOCK_DRIVERS_POOL.find((d) => d.id === driverId);
+        const last = msgs[msgs.length - 1];
+        return driver && last ? { driver, last } : null;
+      })
+      .filter((c): c is { driver: (typeof MOCK_DRIVERS_POOL)[number]; last: ChatMessage } => !!c)
+      .sort((a, b) => new Date(b.last.createdAt).getTime() - new Date(a.last.createdAt).getTime());
+  }, [isListMode, messagesByRide]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
 
-  if (!rideId || !myRole || !account) return null;
+  if (!account || (isListMode && account.role !== 'PASSENGER')) return null;
+
+  if (isListMode) {
+    return (
+      <div className="mx-auto max-w-md px-5 pb-10 pt-8 lg:max-w-2xl lg:px-8">
+        <BackButton className="mb-2" label="Retour" />
+        <h1 className="font-display text-h2 text-foreground">Messages</h1>
+
+        {conversations.length === 0 ? (
+          <EmptyState
+            icon={<MessageCircle className="h-7 w-7" />}
+            title="Aucune conversation"
+            description="Vos échanges avec vos chauffeurs apparaîtront ici pendant vos courses."
+            className="mt-6"
+          />
+        ) : (
+          <div className="mt-6 space-y-2.5">
+            {conversations.map(({ driver, last }) => (
+              <ConversationCard
+                key={driver.id}
+                name={driver.name}
+                avatar={driver.avatar}
+                lastMessage={last.text}
+                time={formatRelativeTime(last.createdAt)}
+                onClick={() =>
+                  navigate('/passenger/chat', {
+                    state: { rideId: driver.id, myRole: 'PASSENGER', otherName: driver.name, otherAvatar: driver.avatar, otherPhone: driver.phone },
+                  })
+                }
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (!rideId || !myRole) return null;
 
   const otherRole = myRole === 'PASSENGER' ? 'DRIVER' : 'PASSENGER';
 
@@ -68,41 +127,39 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="mx-auto flex h-screen max-w-md flex-col bg-background">
+    <div className="mx-auto flex h-screen max-w-md flex-col bg-background lg:max-w-2xl">
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <button onClick={() => navigate(-1)} aria-label="Retour" className="tap-target flex items-center justify-center rounded-full text-muted-foreground hover:bg-surface">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
+        <IconButton icon={<ArrowLeft className="h-5 w-5" />} aria-label="Retour" onClick={() => navigate(-1)} />
         <Avatar name={otherName ?? '?'} src={otherAvatar} size="sm" />
-        <p className="flex-1 truncate text-sm font-semibold text-foreground">{otherName}</p>
+        <p className="flex-1 truncate text-body font-semibold text-foreground">{otherName}</p>
         {otherPhone && (
           <a
             href={`tel:${otherPhone}`}
             aria-label="Appeler"
-            className="tap-target flex items-center justify-center rounded-full text-primary-700 hover:bg-primary-50"
+            className="tap-target flex items-center justify-center rounded-full text-primary-700 transition-colors hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <Phone className="h-5 w-5" />
           </a>
         )}
       </div>
 
+      <div aria-live="polite" className="sr-only">
+        {lastMessage ? `${lastMessage.senderRole === myRole ? 'Vous' : otherName ?? 'Interlocuteur'} : ${lastMessage.text}` : ''}
+      </div>
+
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-        {messages.length === 0 && (
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            Démarrez la conversation avec {otherName ?? 'votre interlocuteur'}.
-          </p>
+        {messages.length === 0 ? (
+          <EmptyState
+            icon={<MessageCircle className="h-7 w-7" />}
+            title="Aucun message"
+            description={`Démarrez la conversation avec ${otherName ?? 'votre interlocuteur'}.`}
+            className="mt-8"
+          />
+        ) : (
+          messages.map((m: ChatMessage) => (
+            <MessageBubble key={m.id} text={m.text} time={formatTime(m.createdAt)} mine={m.senderRole === myRole} />
+          ))
         )}
-        {messages.map((m: ChatMessage) => {
-          const mine = m.senderRole === myRole;
-          return (
-            <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${mine ? 'bg-primary-800 text-white' : 'bg-surface text-foreground'}`}>
-                <p className="text-sm">{m.text}</p>
-                <p className={`mt-1 text-[10px] ${mine ? 'text-primary-100' : 'text-muted-foreground'}`}>{formatTime(m.createdAt)}</p>
-              </div>
-            </div>
-          );
-        })}
         <div ref={bottomRef} />
       </div>
 
@@ -111,8 +168,9 @@ export default function ChatPage() {
           {QUICK_REPLIES.map((q) => (
             <button
               key={q}
+              type="button"
               onClick={() => send(q)}
-              className="shrink-0 whitespace-nowrap rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-medium text-foreground hover:border-primary-300"
+              className="shrink-0 whitespace-nowrap rounded-full border border-border bg-surface px-3.5 py-1.5 text-caption font-medium text-foreground transition-colors hover:border-primary-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {q}
             </button>
@@ -129,16 +187,13 @@ export default function ChatPage() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Écrire un message..."
-            className="h-11 flex-1 rounded-full border border-input bg-background px-4 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+            aria-label="Votre message"
+            className={cn(
+              'h-11 flex-1 rounded-full border border-input bg-background px-4 text-body-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground',
+              'focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+            )}
           />
-          <button
-            type="submit"
-            disabled={!draft.trim()}
-            aria-label="Envoyer"
-            className="tap-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-800 text-white disabled:opacity-40"
-          >
-            <Send className="h-4 w-4" />
-          </button>
+          <IconButton type="submit" icon={<Send className="h-4 w-4" />} aria-label="Envoyer" variant="primary" disabled={!draft.trim()} />
         </form>
       </div>
     </div>

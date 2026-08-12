@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Briefcase, MapPin, Plus, Star, Trash2 } from 'lucide-react';
-import { Button, Card, EmptyState, Input, Modal, toast } from '@/components/ui';
-import { CONAKRY_MAP_CENTER } from '@/data/neighborhoods';
+import { MapPin, Plus } from 'lucide-react';
+import { BackButton, Button, ConfirmDialog, EmptyState, Input, Modal, toast } from '@/components/ui';
+import { PlaceCard } from '@/components/business';
+import { CONAKRY_MAP_CENTER, NEIGHBORHOODS } from '@/data/neighborhoods';
 import { useSavedPlacesStore } from '@/features/profile/savedPlacesStore';
 import type { SavedPlace } from '@/types';
 
-const ICONS: Record<NonNullable<SavedPlace['icon']>, React.ReactNode> = {
-  home: <MapPin className="h-4 w-4" />,
-  work: <Briefcase className="h-4 w-4" />,
-  star: <Star className="h-4 w-4" />,
-};
+const CATEGORIES: { label: string; match: (place: SavedPlace) => boolean }[] = [
+  { label: 'Maison', match: (p) => p.label === 'Home' },
+  { label: 'Travail', match: (p) => p.label === 'Work' },
+  { label: 'Favoris', match: (p) => p.label !== 'Home' && p.label !== 'Work' },
+];
+
+/** Fait correspondre l'adresse saisie à un quartier réel plutôt que de figer le centre de Conakry — un lieu ajouté ici ne doit pas tous pointer au même endroit (audit § 5.2). */
+function resolveCoords(address: string) {
+  const match = NEIGHBORHOODS.find((n) => address.toLowerCase().includes(n.name.toLowerCase()));
+  return match?.coords ?? CONAKRY_MAP_CENTER;
+}
 
 export default function SavedPlacesPage() {
-  const navigate = useNavigate();
   const places = useSavedPlacesStore((s) => s.places);
   const addPlace = useSavedPlacesStore((s) => s.addPlace);
   const removePlace = useSavedPlacesStore((s) => s.removePlace);
@@ -21,21 +26,29 @@ export default function SavedPlacesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [address, setAddress] = useState('');
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
+
+  const pendingPlace = places.find((p) => p.id === pendingRemoveId);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    addPlace({ label, address, coords: CONAKRY_MAP_CENTER, icon: 'star' });
+    addPlace({ label, address, coords: resolveCoords(address), icon: 'star' });
     toast.success('Lieu ajouté.');
     setLabel('');
     setAddress('');
     setModalOpen(false);
   };
 
+  const confirmRemove = () => {
+    if (!pendingRemoveId) return;
+    removePlace(pendingRemoveId);
+    toast('Lieu supprimé.');
+    setPendingRemoveId(null);
+  };
+
   return (
     <div className="mx-auto max-w-md px-5 pb-10 pt-8 lg:max-w-lg lg:px-8">
-      <button onClick={() => navigate(-1)} className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground lg:hidden">
-        <ArrowLeft className="h-4 w-4" /> Retour
-      </button>
+      <BackButton className="mb-2 lg:hidden" />
 
       <div className="flex items-center justify-between">
         <h1 className="font-display text-h2 text-foreground">Lieux enregistrés</h1>
@@ -54,30 +67,21 @@ export default function SavedPlacesPage() {
           className="mt-6"
         />
       ) : (
-        <div className="mt-6 space-y-3">
-          {places.map((place) => (
-            <Card key={place.id} className="flex items-center gap-3.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 text-primary-800">
-                {ICONS[place.icon ?? 'star']}
+        <div className="mt-6 space-y-6">
+          {CATEGORIES.map((category) => {
+            const inCategory = places.filter(category.match);
+            if (inCategory.length === 0) return null;
+            return (
+              <div key={category.label}>
+                <p className="mb-2 text-caption font-semibold uppercase tracking-wide text-muted-foreground">{category.label}</p>
+                <div className="space-y-2.5">
+                  {inCategory.map((place) => (
+                    <PlaceCard key={place.id} place={place} onRemove={() => setPendingRemoveId(place.id)} />
+                  ))}
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-foreground">
-                  {place.label === 'Home' ? 'Domicile' : place.label === 'Work' ? 'Travail' : place.label}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">{place.address}</p>
-              </div>
-              <button
-                aria-label="Supprimer"
-                onClick={() => {
-                  removePlace(place.id);
-                  toast('Lieu supprimé.');
-                }}
-                className="tap-target flex items-center justify-center rounded-full text-muted-foreground hover:bg-danger/10 hover:text-danger"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </Card>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -90,6 +94,16 @@ export default function SavedPlacesPage() {
           </Button>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={pendingRemoveId !== null}
+        onClose={() => setPendingRemoveId(null)}
+        onConfirm={confirmRemove}
+        title="Supprimer ce lieu ?"
+        description={pendingPlace ? `« ${pendingPlace.label === 'Home' ? 'Domicile' : pendingPlace.label === 'Work' ? 'Travail' : pendingPlace.label} » sera retiré de vos lieux enregistrés.` : undefined}
+        confirmLabel="Supprimer"
+        destructive
+      />
     </div>
   );
 }

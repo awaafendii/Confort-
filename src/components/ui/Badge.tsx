@@ -2,12 +2,14 @@ import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-const badgeVariants = cva('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold', {
+const badgeVariants = cva('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-caption', {
   variants: {
     variant: {
       primary: 'border-primary-200 bg-primary-50 text-primary-800',
+      accent: 'border-accent-200 bg-accent-50 text-accent-800',
       secondary: 'border-secondary-200 bg-secondary-50 text-secondary-800',
-      success: 'border-secondary-200 bg-secondary-50 text-secondary-700',
+      // Utilise enfin le token --success dédié (Phase 1) au lieu d'un alias de secondary.
+      success: 'border-success/20 bg-success/10 text-success',
       warning: 'border-warning/20 bg-warning/10 text-warning-strong',
       danger: 'border-danger/20 bg-danger/10 text-danger',
       neutral: 'border-border bg-surface text-muted-foreground',

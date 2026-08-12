@@ -1,66 +1,99 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /**
- * Confort+ — Design tokens
- * -------------------------------------------------
- * Marque : bleu nuit (primary) + vert profond (secondary) sur fond blanc.
- * Toutes les teintes sont exprimées en HSL "H S% L%" (sans hsl()) pour
- * rester compatibles avec la syntaxe hsl(var(--token)) utilisée par Tailwind.
+ * Confort+ — Design tokens (v2 — refonte UI/UX, Phase 1 : Design Tokens)
+ * -------------------------------------------------------------------
+ * Identité : bleu nuit profond (primary) + vert émeraude (accent) sur fond
+ * gris-bleu très clair. Toutes les teintes sont exprimées en HSL "H S% L%"
+ * (sans hsl()) pour rester compatibles avec la syntaxe hsl(var(--token))
+ * utilisée par Tailwind. Les valeurs HSL ci-dessous sont converties avec
+ * précision depuis les hex de la charte fournie (voir docs/DESIGN_SYSTEM.md
+ * pour la table de conversion complète et la justification de chaque choix).
+ *
+ * COMPATIBILITÉ PHASE 1 : `--secondary-*` reste défini comme un alias exact
+ * de `--accent-*` (mêmes valeurs) pour que les ~41 écrans existants, qui
+ * utilisent encore les classes `secondary-*`, continuent de s'afficher sans
+ * modification — ils adopteront le nouveau vert automatiquement. La
+ * migration des classNames vers `accent-*` est prévue en Phase 2+ (voir
+ * docs/DESIGN_SYSTEM.md, section "Dette technique").
  */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 20% 10%;
+    /* Surfaces & texte */
+    --background: 216 45% 98%;   /* #F7F9FC */
+    --surface: 0 0% 100%;        /* #FFFFFF */
+    --surface-hover: 216 30% 95%;
+    --foreground: 220 43% 11%;   /* Text Primary #101828 */
+    --muted: 216 30% 95%;
+    --muted-foreground: 221 13% 46%; /* Text Secondary #667085 */
 
-    --surface: 210 20% 98%;
-    --surface-hover: 210 18% 95%;
-    --border: 214 18% 90%;
-    --input: 214 18% 88%;
-    --ring: 213 50% 42%;
+    --border: 218 17% 91%;       /* #E4E7EC */
+    --input: 218 17% 91%;        /* aligné sur --border (l'écart de 2pts hérité de l'ancien système n'avait pas de justification documentée) */
+    --ring: 209 48% 44%;         /* primary-500 — anneau de focus canonique, à généraliser en Phase 2 */
 
-    --muted: 210 20% 95%;
-    --muted-foreground: 220 10% 42%;
-
-    /* Primary — Bleu nuit */
-    --primary-50: 213 65% 97%;
-    --primary-100: 213 60% 92%;
-    --primary-200: 213 55% 84%;
-    --primary-300: 213 50% 70%;
-    --primary-400: 213 45% 55%;
-    --primary-500: 213 50% 42%;
-    --primary-600: 213 55% 32%;
-    --primary-700: 213 55% 24%;
-    --primary-800: 213 58% 17%;
-    --primary-900: 213 55% 12%;
-    --primary-950: 213 55% 8%;
+    /* Primary — Bleu nuit (ancre exacte : 800 = Primary #102A43, 900 = Primary Dark #071A2B) */
+    --primary-50: 209 65% 97%;
+    --primary-100: 209 60% 93%;
+    --primary-200: 209 55% 85%;
+    --primary-300: 209 50% 72%;
+    --primary-400: 209 47% 58%;
+    --primary-500: 209 48% 44%;
+    --primary-600: 209 52% 32%;
+    --primary-700: 209 56% 23%;
+    --primary-800: 209 61% 16%;  /* #102A43 exact */
+    --primary-900: 208 72% 10%; /* #071A2B exact */
+    --primary-950: 208 75% 7%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary — Vert profond */
-    --secondary-50: 158 55% 97%;
-    --secondary-100: 158 50% 92%;
-    --secondary-200: 158 45% 82%;
-    --secondary-300: 158 40% 65%;
-    --secondary-400: 158 35% 48%;
-    --secondary-500: 158 40% 35%;
-    --secondary-600: 158 45% 27%;
-    --secondary-700: 158 45% 20%;
-    --secondary-800: 158 48% 15%;
-    --secondary-900: 158 45% 11%;
-    --secondary-950: 158 45% 7%;
-    --secondary-foreground: 0 0% 100%;
+    /* Accent — Vert émeraude (ancre exacte : 600 = Accent #16A875, 800 = Accent Dark #087A55) */
+    --accent-50: 158 60% 97%;
+    --accent-100: 158 55% 92%;
+    --accent-200: 158 50% 83%;
+    --accent-300: 158 48% 68%;
+    --accent-400: 158 55% 53%;
+    --accent-500: 159 65% 44%;
+    --accent-600: 159 77% 37%;  /* #16A875 exact */
+    --accent-700: 160 82% 30%;
+    --accent-800: 161 88% 25%; /* #087A55 exact */
+    --accent-900: 161 85% 18%;
+    --accent-950: 161 82% 12%;
+    --accent-foreground: 0 0% 100%;
 
-    --success: 158 45% 27%;
-    --warning: 38 85% 42%;
-    /* Même teinte que --warning, assombrie pour le texte lisible sur fond clair (ratio ~3.15:1 → ~5.6:1, WCAG AA) ; --warning reste tel quel pour les usages non textuels (étoiles de notation, icônes). */
-    --warning-strong: 38 85% 30%;
-    --danger: 356 65% 40%;
-    --info: 213 55% 32%;
+    /* Secondary — alias de compatibilité Phase 1, voir note ci-dessus */
+    --secondary-50: var(--accent-50);
+    --secondary-100: var(--accent-100);
+    --secondary-200: var(--accent-200);
+    --secondary-300: var(--accent-300);
+    --secondary-400: var(--accent-400);
+    --secondary-500: var(--accent-500);
+    --secondary-600: var(--accent-600);
+    --secondary-700: var(--accent-700);
+    --secondary-800: var(--accent-800);
+    --secondary-900: var(--accent-900);
+    --secondary-950: var(--accent-950);
+    --secondary-foreground: var(--accent-foreground);
 
-    --radius: 0.875rem;
+    /* Sémantiques — couleurs propres et indépendantes de la marque (Phase 1 corrige
+       le défaut relevé dans l'audit : --success/--info n'étaient que des alias visuels
+       de secondary/primary). --info n'a pas de valeur dans la charte fournie ; conservé
+       en alias de primary-600 par continuité, candidat à suppression en Phase 2 si son
+       usage réel reste nul (déjà quasi inutilisé selon l'audit). */
+    --success: 152 82% 39%;      /* #12B76A */
+    --warning: 34 94% 50%;       /* #F79009 */
+    --warning-strong: 34 90% 30%; /* variante assombrie pour texte lisible sur fond clair (~4.9:1 WCAG AA), même principe que l'ancien token */
+    --danger: 4 74% 49%;         /* #D92D20 */
+    --info: 209 52% 32%;         /* = primary-600, alias non exploité, voir note */
+
+    /* Border-radius — étapes nommées explicites (remplace l'ancien --radius calculé) */
+    --radius-sm: 0.5rem;   /* 8px */
+    --radius-md: 0.75rem;  /* 12px — boutons, champs */
+    --radius-lg: 1rem;     /* 16px — cartes */
+    --radius-xl: 1.5rem;   /* 24px — bottom sheets, modales */
+    --radius-full: 9999px; /* avatars, badges, pills */
   }
 }
 
@@ -77,7 +110,8 @@
     -webkit-tap-highlight-color: transparent;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    /* Inter comme police unique (Phase 1) — remplace Manrope. */
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }

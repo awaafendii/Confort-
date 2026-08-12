@@ -30,10 +30,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-invalid={!!error}
             aria-describedby={error ? `${inputId}-error` : undefined}
             className={cn(
-              'h-12 w-full rounded-xl border bg-background px-4 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-colors',
-              'focus:border-primary-500 focus:ring-2 focus:ring-primary-100',
+              'h-12 w-full rounded-md border bg-background px-4 text-body text-foreground placeholder:text-muted-foreground outline-none transition-colors',
+              'focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               icon && 'pl-11',
-              error ? 'border-danger focus:border-danger focus:ring-danger/10' : 'border-input',
+              error ? 'border-danger focus-visible:border-danger focus-visible:ring-danger' : 'border-input',
               className
             )}
             {...props}

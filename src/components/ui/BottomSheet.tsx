@@ -33,7 +33,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ open, onClose, childre
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 -z-10 bg-primary-950/40"
+              className="fixed inset-0 -z-10 bg-primary-950/40 backdrop-blur-sm"
               onClick={onClose}
               aria-hidden="true"
             />
@@ -45,8 +45,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ open, onClose, childre
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            drag={!inline && onClose ? 'y' : false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.4 }}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 120 || info.velocity.y > 500) onClose?.();
+            }}
             className={cn(
-              'safe-bottom w-full rounded-t-2xl border-t border-border bg-background px-5 pb-6 pt-3 shadow-sheet',
+              'safe-bottom w-full rounded-t-xl border-t border-border bg-surface px-5 pb-6 pt-3 shadow-sheet',
               className
             )}
           >

@@ -7,7 +7,7 @@ export const Toaster = () => (
     toastOptions={{
       classNames: {
         toast:
-          'rounded-xl border border-border bg-background text-foreground shadow-elevated font-sans text-sm',
+          'rounded-md border border-border bg-surface text-foreground shadow-elevated font-sans text-body-sm',
         title: 'font-semibold',
         actionButton: '!bg-primary-800',
         cancelButton: '!bg-surface',

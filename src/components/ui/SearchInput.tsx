@@ -19,7 +19,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className={cn(
-            'h-12 w-full rounded-xl border border-input bg-background pl-11 pr-10 text-[15px] text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-100',
+            'h-12 w-full rounded-md border border-input bg-background pl-11 pr-10 text-body text-foreground placeholder:text-muted-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             className
           )}
           {...props}
@@ -29,7 +29,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             type="button"
             onClick={() => (onClear ? onClear() : onChange(''))}
             aria-label="Effacer la recherche"
-            className="absolute right-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-surface hover:text-foreground"
+            className="absolute right-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-surface hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <X className="h-4 w-4" />
           </button>
