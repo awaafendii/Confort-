@@ -1,0 +1,7 @@
+# Local-machine workaround for the "&" in this folder's Windows path — breaks npm on Linux builds
+.npmrc
+
+node_modules
+dist
+.env.local
+.claude
