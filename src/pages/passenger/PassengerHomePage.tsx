@@ -13,6 +13,7 @@ import { useIsDesktop } from '@/hooks/useMediaQuery';
 import { NEIGHBORHOODS, CONAKRY_MAP_CENTER } from '@/data/neighborhoods';
 import { NEARBY_VEHICLE_MARKERS } from '@/data/nearbyVehicleMarkers';
 import { PASSENGER_SERVICES } from '@/data/services';
+import { getService } from '@/features/services/serviceRegistry';
 import { PASSENGER_PROMOTIONS } from '@/data/promotions';
 import { cn } from '@/lib/utils';
 import type { SavedPlace } from '@/types';
@@ -143,7 +144,8 @@ export default function PassengerHomePage() {
   };
 
   const handleSelectService = (service: ServiceItem) => {
-    if (service.id === 'ride') navigate('/passenger/search');
+    const definition = getService(service.id);
+    if (definition?.enabled && definition.entryRoute) navigate(definition.entryRoute);
   };
 
   const handleSelectPromotion = (promotion: PromotionItem) => {

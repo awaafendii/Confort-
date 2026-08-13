@@ -32,6 +32,11 @@ const TrackingPage = lazy(() => import('@/pages/passenger/TrackingPage'));
 const RideCompletedPage = lazy(() => import('@/pages/passenger/RideCompletedPage'));
 const TripsPage = lazy(() => import('@/pages/passenger/TripsPage'));
 const RideDetailPage = lazy(() => import('@/pages/passenger/RideDetailPage'));
+const DeliverySearchPage = lazy(() => import('@/pages/passenger/DeliverySearchPage'));
+const DeliveryBookingPage = lazy(() => import('@/pages/passenger/DeliveryBookingPage'));
+const DeliveryMatchingPage = lazy(() => import('@/pages/passenger/DeliveryMatchingPage'));
+const DeliveryTrackingPage = lazy(() => import('@/pages/passenger/DeliveryTrackingPage'));
+const DeliveryCompletedPage = lazy(() => import('@/pages/passenger/DeliveryCompletedPage'));
 const DriverHomePage = lazy(() => import('@/pages/driver/DriverHomePage'));
 const DriverTrackingPage = lazy(() => import('@/pages/driver/DriverTrackingPage'));
 const DriverRideCompletedPage = lazy(() => import('@/pages/driver/DriverRideCompletedPage'));
@@ -144,6 +149,11 @@ export default function App() {
                 <Route path="/passenger/tracking" element={<TrackingPage />} />
                 <Route path="/passenger/chat" element={<ChatPage />} />
                 <Route path="/passenger/ride-completed" element={<RideCompletedPage />} />
+                <Route path="/passenger/delivery" element={<DeliverySearchPage />} />
+                <Route path="/passenger/delivery/booking" element={<DeliveryBookingPage />} />
+                <Route path="/passenger/delivery/booking/matching" element={<DeliveryMatchingPage />} />
+                <Route path="/passenger/delivery/tracking" element={<DeliveryTrackingPage />} />
+                <Route path="/passenger/delivery/completed" element={<DeliveryCompletedPage />} />
 
                 <Route element={<AppShell navItems={PASSENGER_NAV} notificationsTo="/passenger/notifications" />}>
                   <Route path="/passenger" element={<PassengerHomePage />} />
