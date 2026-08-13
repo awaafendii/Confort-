@@ -23,7 +23,12 @@ export const MOCK_DRIVERS_POOL: Driver[] = [
     acceptanceRate: 0.96,
     earningsToday: 150000,
     location: CONAKRY_MAP_CENTER,
-    documents: [],
+    documents: [
+      { type: 'CARTE_IDENTITE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+d%27identit%C3%A9', status: 'VALIDATED' },
+      { type: 'PERMIS', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Permis', status: 'VALIDATED' },
+      { type: 'CARTE_GRISE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+grise', status: 'VALIDATED' },
+      { type: 'ASSURANCE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Assurance', status: 'VALIDATED' },
+    ],
   },
   {
     id: 'md-2',
@@ -40,7 +45,12 @@ export const MOCK_DRIVERS_POOL: Driver[] = [
     acceptanceRate: 0.94,
     earningsToday: 98000,
     location: CONAKRY_MAP_CENTER,
-    documents: [],
+    documents: [
+      { type: 'CARTE_IDENTITE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+d%27identit%C3%A9', status: 'VALIDATED' },
+      { type: 'PERMIS', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Permis', status: 'VALIDATED' },
+      { type: 'CARTE_GRISE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+grise', status: 'VALIDATED' },
+      { type: 'ASSURANCE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Assurance', status: 'VALIDATED' },
+    ],
   },
   {
     id: 'md-3',
@@ -52,12 +62,22 @@ export const MOCK_DRIVERS_POOL: Driver[] = [
     createdAt: new Date().toISOString(),
     vehicle: { id: 'v3', driverId: 'md-3', type: 'VOITURE', brand: 'Kia', model: 'Rio', plateNumber: 'RC-8820-B', color: 'noir' },
     status: 'ONLINE',
-    verification: 'VERIFIED',
+    verification: 'PENDING',
     tripsCompleted: 201,
     acceptanceRate: 0.9,
     earningsToday: 64000,
     location: CONAKRY_MAP_CENTER,
-    documents: [],
+    documents: [
+      { type: 'CARTE_IDENTITE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+d%27identit%C3%A9', status: 'VALIDATED' },
+      { type: 'PERMIS', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Permis', status: 'PENDING' },
+      { type: 'CARTE_GRISE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+grise', status: 'PENDING' },
+      {
+        type: 'ASSURANCE',
+        url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Assurance',
+        status: 'REJECTED',
+        rejectionReason: 'Assurance expirée — merci de soumettre une attestation à jour.',
+      },
+    ],
   },
   {
     id: 'md-4',
@@ -74,7 +94,12 @@ export const MOCK_DRIVERS_POOL: Driver[] = [
     acceptanceRate: 0.92,
     earningsToday: 45000,
     location: CONAKRY_MAP_CENTER,
-    documents: [],
+    documents: [
+      { type: 'CARTE_IDENTITE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+d%27identit%C3%A9', status: 'VALIDATED' },
+      { type: 'PERMIS', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Permis', status: 'VALIDATED' },
+      { type: 'CARTE_GRISE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+grise', status: 'VALIDATED' },
+      { type: 'ASSURANCE', url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Assurance', status: 'VALIDATED' },
+    ],
   },
 ];
 

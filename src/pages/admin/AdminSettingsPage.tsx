@@ -1,56 +1,50 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Card, Input, Switch, Textarea } from '@/components/ui';
+import { METHOD_LABEL } from '@/components/admin';
 import { RIDE_CATEGORIES_CONFIG, calculateStandardFare } from '@/data/pricing';
-import { cn } from '@/lib/utils';
+import { NEIGHBORHOODS } from '@/data/neighborhoods';
 import { useAuthStore } from '@/features/auth/store';
-import type { RideCategory } from '@/types';
-
-interface SettingToggle {
-  id: string;
-  label: string;
-  description: string;
-  defaultChecked: boolean;
-}
-
-const TOGGLES: SettingToggle[] = [
-  { id: 'signups', label: 'Nouvelles inscriptions chauffeurs', description: 'Autoriser les nouveaux chauffeurs à créer un compte.', defaultChecked: true },
-  { id: 'moto', label: 'Moto-taxi activé', description: 'Rendre la catégorie Moto-Taxi réservable à Conakry.', defaultChecked: true },
-  { id: 'maintenance', label: 'Mode maintenance', description: 'Suspendre temporairement les nouvelles courses côté passager.', defaultChecked: false },
-];
-
-function Switch({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
-  return (
-    <button
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={onChange}
-      className={cn(
-        'relative h-8 w-14 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        checked ? 'bg-secondary-700' : 'bg-border'
-      )}
-    >
-      <span
-        className={cn(
-          'absolute top-1 h-6 w-6 rounded-full bg-white shadow-card transition-transform',
-          checked ? 'translate-x-7' : 'translate-x-1'
-        )}
-      />
-    </button>
-  );
-}
+import { useAdminSettingsStore } from '@/features/admin/adminSettingsStore';
+import type { PaymentMethod, RideCategory } from '@/types';
 
 const SAMPLE_FARE_KALOUM_MADINA = calculateStandardFare('kaloum', 'madina');
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <p className="mt-6 text-sm font-semibold text-foreground">{children}</p>;
+}
+
+function ToggleRow({ label, description, checked, onChange }: { label: string; description: string; checked: boolean; onChange: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-4 p-4">
+      <div>
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+      <Switch checked={checked} onChange={onChange} label={label} />
+    </div>
+  );
+}
 
 export default function AdminSettingsPage() {
   const navigate = useNavigate();
   const account = useAuthStore((s) => s.account);
   const logout = useAuthStore((s) => s.logout);
-  const [toggles, setToggles] = useState<Record<string, boolean>>(
-    Object.fromEntries(TOGGLES.map((t) => [t.id, t.defaultChecked]))
-  );
+
+  const general = useAdminSettingsStore((s) => s.general);
+  const featureFlags = useAdminSettingsStore((s) => s.featureFlags);
+  const maintenance = useAdminSettingsStore((s) => s.maintenance);
+  const paymentMethods = useAdminSettingsStore((s) => s.paymentMethods);
+  const notifications = useAdminSettingsStore((s) => s.notifications);
+  const security = useAdminSettingsStore((s) => s.security);
+  const setGeneral = useAdminSettingsStore((s) => s.setGeneral);
+  const setFeatureFlag = useAdminSettingsStore((s) => s.setFeatureFlag);
+  const setMaintenanceEnabled = useAdminSettingsStore((s) => s.setMaintenanceEnabled);
+  const setMaintenanceMessage = useAdminSettingsStore((s) => s.setMaintenanceMessage);
+  const setPaymentMethodEnabled = useAdminSettingsStore((s) => s.setPaymentMethodEnabled);
+  const setNotification = useAdminSettingsStore((s) => s.setNotification);
+  const setSecurity = useAdminSettingsStore((s) => s.setSecurity);
 
   return (
     <div className="mx-auto max-w-3xl px-5 pb-10 pt-8 lg:px-8">
@@ -72,24 +66,13 @@ export default function AdminSettingsPage() {
         </button>
       </Card>
 
-      <p className="mt-6 text-sm font-semibold text-foreground">Fonctionnalités de la plateforme</p>
-      <Card noPadding className="mt-2 divide-y divide-border">
-        {TOGGLES.map((toggle) => (
-          <div key={toggle.id} className="flex items-center justify-between gap-4 p-4">
-            <div>
-              <p className="text-sm font-semibold text-foreground">{toggle.label}</p>
-              <p className="text-xs text-muted-foreground">{toggle.description}</p>
-            </div>
-            <Switch
-              checked={toggles[toggle.id]}
-              onChange={() => setToggles((prev) => ({ ...prev, [toggle.id]: !prev[toggle.id] }))}
-              label={toggle.label}
-            />
-          </div>
-        ))}
+      <SectionLabel>Général</SectionLabel>
+      <Card className="mt-2 space-y-4">
+        <Input label="Email support" type="email" value={general.supportEmail} onChange={(e) => setGeneral({ supportEmail: e.target.value })} />
+        <Input label="Téléphone support" value={general.supportPhone} onChange={(e) => setGeneral({ supportPhone: e.target.value })} />
       </Card>
 
-      <p className="mt-6 text-sm font-semibold text-foreground">Grille tarifaire</p>
+      <SectionLabel>Tarification</SectionLabel>
       <p className="mt-1 text-xs text-muted-foreground">
         Référence Kaloum → Madina : {new Intl.NumberFormat('fr-FR').format(SAMPLE_FARE_KALOUM_MADINA)} FG. Modification de la
         tarification réservée à l'équipe produit.
@@ -107,6 +90,95 @@ export default function AdminSettingsPage() {
             </div>
           );
         })}
+      </Card>
+
+      <SectionLabel>Zones</SectionLabel>
+      <p className="mt-1 text-xs text-muted-foreground">{NEIGHBORHOODS.length} zones actives à Conakry. Gestion des zones réservée à l'équipe produit.</p>
+      <Card className="mt-2">
+        <div className="flex flex-wrap gap-1.5">
+          {NEIGHBORHOODS.map((n) => (
+            <span key={n.id} className="rounded-full border border-border px-2.5 py-1 text-caption text-muted-foreground">
+              {n.name}
+            </span>
+          ))}
+        </div>
+      </Card>
+
+      <SectionLabel>Paiements</SectionLabel>
+      <Card noPadding className="mt-2 divide-y divide-border">
+        {(Object.keys(paymentMethods) as PaymentMethod[]).map((method) => (
+          <ToggleRow
+            key={method}
+            label={METHOD_LABEL[method]}
+            description={`Accepter ${METHOD_LABEL[method]} comme moyen de paiement.`}
+            checked={paymentMethods[method]}
+            onChange={() => setPaymentMethodEnabled(method)}
+          />
+        ))}
+      </Card>
+
+      <SectionLabel>Notifications</SectionLabel>
+      <Card noPadding className="mt-2 divide-y divide-border">
+        <ToggleRow
+          label="Alertes par email"
+          description="Recevoir un email pour les événements critiques (annulations élevées, incidents)."
+          checked={notifications.emailAlerts}
+          onChange={() => setNotification('emailAlerts')}
+        />
+        <ToggleRow
+          label="Alertes push"
+          description="Recevoir une notification push sur le navigateur admin."
+          checked={notifications.pushAlerts}
+          onChange={() => setNotification('pushAlerts')}
+        />
+      </Card>
+
+      <SectionLabel>Sécurité</SectionLabel>
+      <Card noPadding className="mt-2 divide-y divide-border">
+        <ToggleRow
+          label="Double authentification requise"
+          description="Exiger la double authentification pour tous les comptes admin."
+          checked={security.twoFactorRequired}
+          onChange={() => setSecurity('twoFactorRequired')}
+        />
+        <ToggleRow
+          label="Expiration de session"
+          description="Déconnecter automatiquement après une période d'inactivité."
+          checked={security.sessionTimeout}
+          onChange={() => setSecurity('sessionTimeout')}
+        />
+      </Card>
+
+      <SectionLabel>Fonctionnalités</SectionLabel>
+      <Card noPadding className="mt-2 divide-y divide-border">
+        <ToggleRow
+          label="Nouvelles inscriptions chauffeurs"
+          description="Autoriser les nouveaux chauffeurs à créer un compte."
+          checked={featureFlags.signupsEnabled}
+          onChange={() => setFeatureFlag('signupsEnabled')}
+        />
+        <ToggleRow
+          label="Moto-taxi activé"
+          description="Rendre la catégorie Moto-Taxi réservable à Conakry."
+          checked={featureFlags.motoEnabled}
+          onChange={() => setFeatureFlag('motoEnabled')}
+        />
+      </Card>
+
+      <SectionLabel>Maintenance</SectionLabel>
+      <Card className="mt-2 space-y-4">
+        <ToggleRow
+          label="Mode maintenance"
+          description="Suspendre temporairement les nouvelles courses côté passager."
+          checked={maintenance.enabled}
+          onChange={setMaintenanceEnabled}
+        />
+        <Textarea
+          label="Message affiché aux utilisateurs"
+          value={maintenance.message}
+          onChange={(e) => setMaintenanceMessage(e.target.value)}
+          rows={3}
+        />
       </Card>
     </div>
   );

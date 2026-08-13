@@ -1,141 +1,114 @@
 import React, { useMemo, useState } from 'react';
-import { FileText, ShieldBan, ShieldCheck } from 'lucide-react';
-import { Avatar, Badge, Rating, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from '@/components/ui';
+import { useNavigate } from 'react-router-dom';
+import { ConfirmDialog, FilterChips, SearchInput } from '@/components/ui';
+import { DriverTable } from '@/components/admin';
 import { useAdminStore } from '@/features/admin/adminStore';
-import { VEHICLE_COLORS } from '@/data/vehicleColors';
-import { formatFare } from '@/utils/format';
-import type { Driver } from '@/types';
+import type { Driver, DriverVerificationStatus } from '@/types';
 
-type FilterId = 'ALL' | 'ONLINE' | 'OFFLINE' | 'PENDING' | 'VERIFIED' | 'SUSPENDED';
+type ConnectionFilter = 'ALL' | 'ONLINE' | 'OFFLINE';
+type VerificationFilter = 'ALL' | DriverVerificationStatus;
 
-const FILTERS: { id: FilterId; label: string }[] = [
+const CONNECTION_FILTERS: { id: ConnectionFilter; label: string }[] = [
   { id: 'ALL', label: 'Tous' },
   { id: 'ONLINE', label: 'En ligne' },
   { id: 'OFFLINE', label: 'Hors ligne' },
+];
+
+const VERIFICATION_FILTERS: { id: VerificationFilter; label: string }[] = [
+  { id: 'ALL', label: 'Tous' },
   { id: 'PENDING', label: 'En attente' },
   { id: 'VERIFIED', label: 'Vérifiés' },
   { id: 'SUSPENDED', label: 'Suspendus' },
 ];
 
-function matchesFilter(driver: Driver, filter: FilterId): boolean {
-  switch (filter) {
-    case 'ALL':
-      return true;
-    case 'ONLINE':
-    case 'OFFLINE':
-      return driver.status === filter;
-    default:
-      return driver.verification === filter;
-  }
-}
-
-const VERIFICATION_BADGE: Record<Driver['verification'], { label: string; variant: 'success' | 'warning' | 'danger' }> = {
-  VERIFIED: { label: 'Vérifié', variant: 'success' },
-  PENDING: { label: 'En attente', variant: 'warning' },
-  SUSPENDED: { label: 'Suspendu', variant: 'danger' },
+const ACTION_LABEL: Record<DriverVerificationStatus, { title: string; description: (name: string) => string; confirm: string; destructive: boolean }> = {
+  VERIFIED: {
+    title: 'Vérifier ce chauffeur ?',
+    description: (name) => `${name} pourra recevoir des courses en tant que chauffeur vérifié.`,
+    confirm: 'Vérifier',
+    destructive: false,
+  },
+  SUSPENDED: {
+    title: 'Suspendre ce chauffeur ?',
+    description: (name) => `${name} ne pourra plus recevoir de nouvelles courses tant que le compte reste suspendu.`,
+    confirm: 'Suspendre',
+    destructive: true,
+  },
+  PENDING: {
+    title: 'Repasser en attente ?',
+    description: (name) => `${name} repassera en vérification en attente.`,
+    confirm: 'Confirmer',
+    destructive: false,
+  },
 };
 
 export default function AdminDriversPage() {
+  const navigate = useNavigate();
   const drivers = useAdminStore((s) => s.drivers);
   const setDriverVerification = useAdminStore((s) => s.setDriverVerification);
-  const [filter, setFilter] = useState<FilterId>('ALL');
 
-  const filtered = useMemo(() => drivers.filter((d) => matchesFilter(d, filter)), [drivers, filter]);
+  const [search, setSearch] = useState('');
+  const [connectionFilter, setConnectionFilter] = useState<ConnectionFilter>('ALL');
+  const [verificationFilter, setVerificationFilter] = useState<VerificationFilter>('ALL');
+  const [pending, setPending] = useState<{ driver: Driver; next: DriverVerificationStatus } | null>(null);
+
+  const filtered = useMemo(() => {
+    const byConnection = connectionFilter === 'ALL' ? drivers : drivers.filter((d) => d.status === connectionFilter);
+    const byVerification = verificationFilter === 'ALL' ? byConnection : byConnection.filter((d) => d.verification === verificationFilter);
+    const query = search.trim().toLowerCase();
+    if (!query) return byVerification;
+    return byVerification.filter(
+      (d) => d.name.toLowerCase().includes(query) || d.phone.includes(query) || d.vehicle.plateNumber.toLowerCase().includes(query)
+    );
+  }, [drivers, connectionFilter, verificationFilter, search]);
+
+  const confirmAction = () => {
+    if (!pending) return;
+    setDriverVerification(pending.driver.id, pending.next);
+    setPending(null);
+  };
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-10 pt-8 lg:px-8">
       <h1 className="font-display text-h2 text-foreground lg:hidden">Chauffeurs</h1>
 
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 lg:mt-0">
-        {FILTERS.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setFilter(f.id)}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-              filter === f.id ? 'border-primary-700 bg-primary-50 text-primary-800' : 'border-border text-muted-foreground'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="mt-4 lg:mt-0">
+        <SearchInput value={search} onChange={setSearch} placeholder="Nom, téléphone ou plaque..." className="lg:max-w-xs" />
       </div>
 
-      <Table className="mt-4">
-        <TableHead>
-          <TableRow>
-            <TableHeaderCell>Chauffeur</TableHeaderCell>
-            <TableHeaderCell>Véhicule</TableHeaderCell>
-            <TableHeaderCell>Note</TableHeaderCell>
-            <TableHeaderCell>Statut</TableHeaderCell>
-            <TableHeaderCell>Courses</TableHeaderCell>
-            <TableHeaderCell>Gains</TableHeaderCell>
-            <TableHeaderCell>Documents</TableHeaderCell>
-            <TableHeaderCell>Actions</TableHeaderCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filtered.map((driver) => {
-            const verification = VERIFICATION_BADGE[driver.verification];
-            const color = VEHICLE_COLORS[driver.vehicle.color];
-            return (
-              <TableRow key={driver.id}>
-                <TableCell>
-                  <div className="flex items-center gap-2.5">
-                    <Avatar name={driver.name} src={driver.avatar} size="sm" status={driver.status === 'ONLINE' ? 'online' : 'offline'} />
-                    <span className="font-medium">{driver.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full border border-border" style={{ backgroundColor: color.hex }} />
-                    {driver.vehicle.brand} {driver.vehicle.model}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <Rating value={driver.rating} showValue size={12} />
-                </TableCell>
-                <TableCell>
-                  <Badge variant={verification.variant}>{verification.label}</Badge>
-                </TableCell>
-                <TableCell>{driver.tripsCompleted}</TableCell>
-                <TableCell className="font-semibold">{formatFare(driver.earningsToday)}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <FileText className="h-3.5 w-3.5" /> {driver.documents.length}/4
-                  </span>
-                </TableCell>
-                <TableCell>
-                  {driver.verification === 'SUSPENDED' ? (
-                    <button
-                      onClick={() => setDriverVerification(driver.id, 'VERIFIED')}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-secondary-700 hover:underline"
-                    >
-                      <ShieldCheck className="h-3.5 w-3.5" /> Réactiver
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setDriverVerification(driver.id, driver.verification === 'PENDING' ? 'VERIFIED' : 'SUSPENDED')}
-                      className={`flex items-center gap-1.5 text-xs font-semibold hover:underline ${
-                        driver.verification === 'PENDING' ? 'text-secondary-700' : 'text-danger'
-                      }`}
-                    >
-                      {driver.verification === 'PENDING' ? (
-                        <>
-                          <ShieldCheck className="h-3.5 w-3.5" /> Vérifier
-                        </>
-                      ) : (
-                        <>
-                          <ShieldBan className="h-3.5 w-3.5" /> Suspendre
-                        </>
-                      )}
-                    </button>
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6">
+        <div>
+          <p className="mb-1.5 text-caption font-medium text-muted-foreground">Connexion</p>
+          <FilterChips options={CONNECTION_FILTERS} value={connectionFilter} onChange={setConnectionFilter} label="Filtrer par connexion" />
+        </div>
+        <div>
+          <p className="mb-1.5 text-caption font-medium text-muted-foreground">Vérification</p>
+          <FilterChips options={VERIFICATION_FILTERS} value={verificationFilter} onChange={setVerificationFilter} label="Filtrer par vérification" />
+        </div>
+      </div>
+
+      <p className="mt-3 text-body-sm text-muted-foreground">
+        {filtered.length} chauffeur{filtered.length > 1 ? 's' : ''}
+      </p>
+
+      <DriverTable
+        drivers={filtered}
+        onView={(driver) => navigate(`/admin/drivers/${driver.id}`)}
+        onRequestVerification={(driver, next) => setPending({ driver, next })}
+        className="mt-4"
+      />
+
+      {pending && (
+        <ConfirmDialog
+          open={!!pending}
+          onClose={() => setPending(null)}
+          onConfirm={confirmAction}
+          title={ACTION_LABEL[pending.next].title}
+          description={ACTION_LABEL[pending.next].description(pending.driver.name)}
+          confirmLabel={ACTION_LABEL[pending.next].confirm}
+          destructive={ACTION_LABEL[pending.next].destructive}
+        />
+      )}
     </div>
   );
 }

@@ -37,6 +37,8 @@ export interface DriverDocument {
   type: 'PERMIS' | 'CARTE_IDENTITE' | 'CARTE_GRISE' | 'ASSURANCE';
   url: string;
   status: 'PENDING' | 'VALIDATED' | 'REJECTED';
+  /** Motif affiché au chauffeur quand `status` vaut `REJECTED`. */
+  rejectionReason?: string;
 }
 
 export interface Driver extends User {

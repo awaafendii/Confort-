@@ -60,7 +60,19 @@ const DEMO_DRIVER: Driver = {
   acceptanceRate: 0.96,
   earningsToday: 150000,
   location: { lat: 9.545, lng: -13.68 },
-  documents: [],
+  documents: [
+    {
+      type: 'CARTE_IDENTITE',
+      url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Carte+d%27identit%C3%A9',
+      status: 'VALIDATED',
+    },
+    {
+      type: 'PERMIS',
+      url: 'https://placehold.co/480x300/102A43/FFFFFF?text=Permis+de+conduire',
+      status: 'REJECTED',
+      rejectionReason: 'Photo floue — merci de renvoyer une photo nette et lisible du document.',
+    },
+  ],
 };
 
 const DEMO_ADMIN: User = {

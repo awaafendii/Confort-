@@ -31,6 +31,14 @@ export interface TripSimulationConfig {
   arrivedPauseMs?: number;
   toDestinationMs?: number;
   onComplete?: () => void;
+  /**
+   * Côté chauffeur (DriverTrackingPage) : la progression au-delà de "arrivé au pickup" et
+   * "arrivé à destination" attend une confirmation explicite (confirmArrival/confirmStart/
+   * confirmFinish) plutôt que d'avancer seule au bout d'un délai — corrige le problème
+   * principal relevé par l'audit ("le chauffeur est spectateur de sa propre course").
+   * Défaut false = comportement automatique inchangé (passager : rien à confirmer soi-même).
+   */
+  manual?: boolean;
 }
 
 export interface TripSimulationState {
@@ -39,6 +47,18 @@ export interface TripSimulationState {
   heading: number;
   etaMin: number;
   progress: number;
+  /** `manual` uniquement : le trajet a rejoint le pickup et attend confirmArrival(). */
+  awaitingArrival: boolean;
+  /** `manual` uniquement : l'arrivée est confirmée, en attente de confirmStart(). */
+  awaitingStart: boolean;
+  /** `manual` uniquement : la destination est atteinte, en attente de confirmFinish(). */
+  awaitingFinish: boolean;
+  /** Confirme l'arrivée au point de prise en charge (ignoré hors `manual`/`awaitingArrival`). */
+  confirmArrival: () => void;
+  /** Démarre le trajet vers la destination (ignoré hors `manual`/`awaitingStart`). */
+  confirmStart: () => void;
+  /** Termine la course et déclenche `onComplete` (ignoré hors `manual`/`awaitingFinish`). */
+  confirmFinish: () => void;
 }
 
 function distance(a: GeoPoint, b: GeoPoint): number {
@@ -76,6 +96,7 @@ export function useTripSimulation({
   arrivedPauseMs = DEFAULT_ARRIVED_PAUSE_MS,
   toDestinationMs = DEFAULT_TO_DESTINATION_MS,
   onComplete,
+  manual = false,
 }: TripSimulationConfig): TripSimulationState {
   const [, forceTick] = useState(0);
   const startRef = useRef(Date.now());
@@ -83,33 +104,72 @@ export function useTripSimulation({
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
+  const [arrivalConfirmed, setArrivalConfirmed] = useState(false);
+  const [destinationStartedAt, setDestinationStartedAt] = useState<number | null>(null);
+
   useEffect(() => {
     startRef.current = Date.now();
     completedRef.current = false;
+    setArrivalConfirmed(false);
+    setDestinationStartedAt(null);
     const interval = setInterval(() => forceTick((n) => n + 1), TICK_MS);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toPickupPath, toDestinationPath]);
 
-  const totalMs = toPickupMs + arrivedPauseMs + toDestinationMs;
-  const elapsed = Math.min(Date.now() - startRef.current, totalMs);
-  const overallProgress = totalMs === 0 ? 1 : elapsed / totalMs;
-
   let status: RideStatus;
   let position: GeoPoint;
   let heading = 0;
+  let overallProgress: number;
+  let awaitingArrival = false;
+  let awaitingStart = false;
+  let awaitingFinish = false;
 
-  if (elapsed < toPickupMs) {
-    const t = elapsed / toPickupMs;
-    status = t >= ARRIVING_THRESHOLD ? 'DRIVER_ARRIVING' : 'DRIVER_ASSIGNED';
-    ({ position, heading } = interpolatePath(toPickupPath, t));
-  } else if (elapsed < toPickupMs + arrivedPauseMs) {
-    status = 'DRIVER_ARRIVED';
-    position = toPickupPath[toPickupPath.length - 1];
+  if (!manual) {
+    // Automatique (passager) — comportement d'origine inchangé.
+    const totalMs = toPickupMs + arrivedPauseMs + toDestinationMs;
+    const elapsed = Math.min(Date.now() - startRef.current, totalMs);
+    overallProgress = totalMs === 0 ? 1 : elapsed / totalMs;
+
+    if (elapsed < toPickupMs) {
+      const t = elapsed / toPickupMs;
+      status = t >= ARRIVING_THRESHOLD ? 'DRIVER_ARRIVING' : 'DRIVER_ASSIGNED';
+      ({ position, heading } = interpolatePath(toPickupPath, t));
+    } else if (elapsed < toPickupMs + arrivedPauseMs) {
+      status = 'DRIVER_ARRIVED';
+      position = toPickupPath[toPickupPath.length - 1];
+    } else {
+      const t = (elapsed - toPickupMs - arrivedPauseMs) / toDestinationMs;
+      status = t >= 1 ? 'COMPLETED' : 'IN_PROGRESS';
+      ({ position, heading } = interpolatePath(toDestinationPath, t));
+    }
   } else {
-    const t = (elapsed - toPickupMs - arrivedPauseMs) / toDestinationMs;
-    status = t >= 1 ? 'COMPLETED' : 'IN_PROGRESS';
-    ({ position, heading } = interpolatePath(toDestinationPath, t));
+    // Manuel (chauffeur) — la progression s'arrête à chaque étape en attendant confirmArrival/confirmStart/confirmFinish.
+    const elapsedToPickup = Math.min(Date.now() - startRef.current, toPickupMs);
+    const tPickup = toPickupMs === 0 ? 1 : elapsedToPickup / toPickupMs;
+
+    if (tPickup < 1) {
+      status = tPickup >= ARRIVING_THRESHOLD ? 'DRIVER_ARRIVING' : 'DRIVER_ASSIGNED';
+      ({ position, heading } = interpolatePath(toPickupPath, tPickup));
+      overallProgress = tPickup * 0.4;
+    } else if (!arrivalConfirmed) {
+      status = 'DRIVER_ARRIVING';
+      position = toPickupPath[toPickupPath.length - 1];
+      awaitingArrival = true;
+      overallProgress = 0.4;
+    } else if (destinationStartedAt === null) {
+      status = 'DRIVER_ARRIVED';
+      position = toPickupPath[toPickupPath.length - 1];
+      awaitingStart = true;
+      overallProgress = 0.5;
+    } else {
+      const elapsedLeg = Math.max(0, Math.min(Date.now() - destinationStartedAt, toDestinationMs));
+      const tDest = toDestinationMs === 0 ? 1 : elapsedLeg / toDestinationMs;
+      ({ position, heading } = interpolatePath(toDestinationPath, tDest));
+      status = 'IN_PROGRESS';
+      if (tDest >= 1) awaitingFinish = true;
+      overallProgress = 0.5 + tDest * 0.5;
+    }
   }
 
   useEffect(() => {
@@ -121,5 +181,29 @@ export function useTripSimulation({
 
   const etaMin = status === 'COMPLETED' ? 0 : Math.max(1, Math.ceil(estimatedTotalMin * (1 - overallProgress)));
 
-  return { status, position, heading, etaMin, progress: overallProgress };
+  const confirmArrival = () => {
+    if (manual && awaitingArrival) setArrivalConfirmed(true);
+  };
+  const confirmStart = () => {
+    if (manual && awaitingStart) setDestinationStartedAt(Date.now());
+  };
+  const confirmFinish = () => {
+    if (!manual || !awaitingFinish || completedRef.current) return;
+    completedRef.current = true;
+    onCompleteRef.current?.();
+  };
+
+  return {
+    status,
+    position,
+    heading,
+    etaMin,
+    progress: overallProgress,
+    awaitingArrival,
+    awaitingStart,
+    awaitingFinish,
+    confirmArrival,
+    confirmStart,
+    confirmFinish,
+  };
 }

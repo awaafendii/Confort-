@@ -34,7 +34,9 @@ const TripsPage = lazy(() => import('@/pages/passenger/TripsPage'));
 const RideDetailPage = lazy(() => import('@/pages/passenger/RideDetailPage'));
 const DriverHomePage = lazy(() => import('@/pages/driver/DriverHomePage'));
 const DriverTrackingPage = lazy(() => import('@/pages/driver/DriverTrackingPage'));
+const DriverRideCompletedPage = lazy(() => import('@/pages/driver/DriverRideCompletedPage'));
 const DriverTripsPage = lazy(() => import('@/pages/driver/DriverTripsPage'));
+const DriverRideDetailPage = lazy(() => import('@/pages/driver/DriverRideDetailPage'));
 const DriverEarningsPage = lazy(() => import('@/pages/driver/DriverEarningsPage'));
 const DriverProfilePage = lazy(() => import('@/pages/driver/DriverProfilePage'));
 const VehiclePage = lazy(() => import('@/pages/driver/VehiclePage'));
@@ -42,9 +44,12 @@ const DocumentsPage = lazy(() => import('@/pages/driver/DocumentsPage'));
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
 const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
 const AdminDriversPage = lazy(() => import('@/pages/admin/AdminDriversPage'));
+const AdminDriverDetailPage = lazy(() => import('@/pages/admin/AdminDriverDetailPage'));
 const AdminRidesPage = lazy(() => import('@/pages/admin/AdminRidesPage'));
+const AdminRideDetailPage = lazy(() => import('@/pages/admin/AdminRideDetailPage'));
 const AdminPaymentsPage = lazy(() => import('@/pages/admin/AdminPaymentsPage'));
 const AdminSupportPage = lazy(() => import('@/pages/admin/AdminSupportPage'));
+const AdminSupportDetailPage = lazy(() => import('@/pages/admin/AdminSupportDetailPage'));
 const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'));
 const AdminAnalyticsPage = lazy(() => import('@/pages/admin/AdminAnalyticsPage'));
 const AdminAuditPage = lazy(() => import('@/pages/admin/AdminAuditPage'));
@@ -157,11 +162,13 @@ export default function App() {
 
               <Route element={<RequireDriver />}>
                 <Route path="/driver/tracking" element={<DriverTrackingPage />} />
+                <Route path="/driver/ride-completed" element={<DriverRideCompletedPage />} />
                 <Route path="/driver/chat" element={<ChatPage />} />
 
                 <Route element={<AppShell navItems={DRIVER_NAV} notificationsTo="/driver/notifications" />}>
                   <Route path="/driver" element={<DriverHomePage />} />
                   <Route path="/driver/trips" element={<DriverTripsPage />} />
+                  <Route path="/driver/trips/:rideId" element={<DriverRideDetailPage />} />
                   <Route path="/driver/earnings" element={<DriverEarningsPage />} />
                   <Route path="/driver/notifications" element={<NotificationsPage />} />
                   <Route path="/driver/profile" element={<DriverProfilePage />} />
@@ -178,9 +185,12 @@ export default function App() {
                   <Route path="/admin" element={<AdminDashboardPage />} />
                   <Route path="/admin/users" element={<AdminUsersPage />} />
                   <Route path="/admin/drivers" element={<AdminDriversPage />} />
+                  <Route path="/admin/drivers/:driverId" element={<AdminDriverDetailPage />} />
                   <Route path="/admin/rides" element={<AdminRidesPage />} />
+                  <Route path="/admin/rides/:rideId" element={<AdminRideDetailPage />} />
                   <Route path="/admin/payments" element={<AdminPaymentsPage />} />
                   <Route path="/admin/support" element={<AdminSupportPage />} />
+                  <Route path="/admin/support/:ticketId" element={<AdminSupportDetailPage />} />
                   <Route path="/admin/settings" element={<AdminSettingsPage />} />
                   <Route path="/admin/notifications" element={<NotificationsPage />} />
                   <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />

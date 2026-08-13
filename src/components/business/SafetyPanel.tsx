@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 export interface SafetyPanelProps {
   onShareTrip?: () => void;
   onCallDriver?: () => void;
+  /** Libellé de l'action d'appel — "Appeler le chauffeur" (passager) par défaut, ex. "Appeler le passager" côté chauffeur. */
+  callLabel?: string;
   onContactSupport?: () => void;
   onReportIssue?: () => void;
   onSOS?: () => void;
@@ -26,6 +28,7 @@ interface SafetyAction {
 export const SafetyPanel: React.FC<SafetyPanelProps> = ({
   onShareTrip,
   onCallDriver,
+  callLabel = 'Appeler le chauffeur',
   onContactSupport,
   onReportIssue,
   onSOS,
@@ -33,7 +36,7 @@ export const SafetyPanel: React.FC<SafetyPanelProps> = ({
 }) => {
   const actions: SafetyAction[] = [
     { key: 'share', label: 'Partager le trajet', icon: <Share2 className="h-5 w-5" />, onClick: onShareTrip },
-    { key: 'call', label: 'Appeler le chauffeur', icon: <Phone className="h-5 w-5" />, onClick: onCallDriver },
+    { key: 'call', label: callLabel, icon: <Phone className="h-5 w-5" />, onClick: onCallDriver },
     { key: 'support', label: 'Contacter le support', icon: <LifeBuoy className="h-5 w-5" />, onClick: onContactSupport },
     { key: 'report', label: 'Signaler un problème', icon: <AlertTriangle className="h-5 w-5" />, onClick: onReportIssue },
   ].filter((a) => a.onClick);

@@ -7,9 +7,11 @@ export interface ProfileMenuItemProps {
   label: string;
   onClick: () => void;
   danger?: boolean;
+  /** Ex. un `Badge` de statut de document — affiché avant le chevron. */
+  badge?: React.ReactNode;
 }
 
-export const ProfileMenuItem: React.FC<ProfileMenuItemProps> = ({ icon, label, onClick, danger = false }) => (
+export const ProfileMenuItem: React.FC<ProfileMenuItemProps> = ({ icon, label, onClick, danger = false, badge }) => (
   <button
     onClick={onClick}
     className={cn(
@@ -21,6 +23,7 @@ export const ProfileMenuItem: React.FC<ProfileMenuItemProps> = ({ icon, label, o
       {icon}
     </div>
     <span className={cn('flex-1 text-body font-medium', danger ? 'text-danger' : 'text-foreground')}>{label}</span>
+    {badge}
     {!danger && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
   </button>
 );
