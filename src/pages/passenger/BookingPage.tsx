@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Banknote, Bike, Car, CreditCard, Smartphone } from 'lucide-react';
+import { ArrowLeft, Banknote, CreditCard, Smartphone } from 'lucide-react';
 import { Button, IconButton, BottomSheet } from '@/components/ui';
 import { MapView, type MapMarkerSpec } from '@/components/map/MapView';
-import { RideSummary, RideOptionCard, PriceBreakdown, PaymentMethodRow, MAP_MARKER_COLORS } from '@/components/business';
+import { RideSummary, PriceBreakdown, PaymentMethodRow, MAP_MARKER_COLORS } from '@/components/business';
+import { VehicleSelector } from '@/components/vehicle';
 import { usePaymentMethodsStore } from '@/features/payments/paymentMethodsStore';
 import { useIsDesktop } from '@/hooks/useMediaQuery';
 import { CONAKRY_MAP_CENTER, getNeighborhood } from '@/data/neighborhoods';
@@ -84,25 +85,17 @@ export default function BookingPage() {
     </div>
   );
 
+  const categoryEtas = Object.fromEntries(
+    (Object.keys(RIDE_CATEGORIES_CONFIG) as RideCategory[]).map((cat) => [
+      cat,
+      formatDuration(calculateRouteEstimate(ORIGIN_ID, destinationId, cat).durationMin),
+    ])
+  ) as Record<RideCategory, string>;
+
   const rideOptions = (
-    <div role="radiogroup" aria-label="Catégorie de course" className="space-y-2.5">
-      {(Object.keys(RIDE_CATEGORIES_CONFIG) as RideCategory[]).map((cat) => {
-        const config = RIDE_CATEGORIES_CONFIG[cat];
-        const isMoto = cat === 'MOTO_SINGLE';
-        const catEstimate = calculateRouteEstimate(ORIGIN_ID, destinationId, cat);
-        return (
-          <RideOptionCard
-            key={cat}
-            icon={isMoto ? <Bike className="h-5 w-5" /> : <Car className="h-5 w-5" />}
-            name={config.label}
-            description={config.description}
-            eta={formatDuration(catEstimate.durationMin)}
-            price={fares[cat]}
-            selected={category === cat}
-            onSelect={() => setCategory(cat)}
-          />
-        );
-      })}
+    <div>
+      <p className="mb-2 text-body-sm font-medium text-foreground">Catégorie de course</p>
+      <VehicleSelector prices={fares} etas={categoryEtas} value={category} onChange={setCategory} />
     </div>
   );
 

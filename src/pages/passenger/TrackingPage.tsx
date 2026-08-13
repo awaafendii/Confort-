@@ -6,6 +6,7 @@ import { DriverCard, SafetyPanel, MAP_MARKER_COLORS } from '@/components/busines
 import { MapView } from '@/components/map/MapView';
 import { getNeighborhood } from '@/data/neighborhoods';
 import { calculateFaresByCategory, calculateRouteEstimate, getNeighborhoodPath, RIDE_CATEGORIES_CONFIG } from '@/data/pricing';
+import { VEHICLE_CATALOG } from '@/data/vehicles';
 import { VEHICLE_COLORS } from '@/data/vehicleColors';
 import { useAuthStore } from '@/features/auth/store';
 import { useNotificationsStore } from '@/features/notifications/notificationsStore';
@@ -164,11 +165,14 @@ export default function TrackingPage() {
 
   const tripInfo = (
     <>
-      <div className="mb-3 flex items-center justify-between">
-        <Badge variant="neutral">{RIDE_CATEGORIES_CONFIG[category].label}</Badge>
-        <span className="text-body-sm font-semibold text-foreground">
-          {sim.status === 'COMPLETED' || sim.status === 'DRIVER_ARRIVED' ? 'Arrivé' : `${sim.etaMin} min`}
-        </span>
+      <div className="mb-3 flex items-center gap-3">
+        <img src={VEHICLE_CATALOG[category].image} alt="" aria-hidden="true" className="h-11 w-auto shrink-0 object-contain" loading="lazy" />
+        <div className="flex flex-1 items-center justify-between">
+          <Badge variant="neutral">{RIDE_CATEGORIES_CONFIG[category].label}</Badge>
+          <span className="text-body-sm font-semibold text-foreground">
+            {sim.status === 'COMPLETED' || sim.status === 'DRIVER_ARRIVED' ? 'Arrivé' : `${sim.etaMin} min`}
+          </span>
+        </div>
       </div>
 
       <DriverCard driver={driver} eta={sim.status === 'DRIVER_ARRIVED' ? 'Arrivé' : `${sim.etaMin} min`} />

@@ -2,14 +2,18 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Bell, Briefcase, Clock, Home, Search } from 'lucide-react';
-import { Avatar, Card, Skeleton } from '@/components/ui';
+import { Avatar, Card, Skeleton, toast } from '@/components/ui';
 import { MapView } from '@/components/map/MapView';
+import { ServiceGrid, type ServiceItem } from '@/components/service';
+import { PromotionCarousel, type PromotionItem } from '@/components/promotion';
 import { useAuthStore } from '@/features/auth/store';
 import { useSavedPlacesStore } from '@/features/profile/savedPlacesStore';
 import { useNotificationsStore } from '@/features/notifications/notificationsStore';
 import { useIsDesktop } from '@/hooks/useMediaQuery';
 import { NEIGHBORHOODS, CONAKRY_MAP_CENTER } from '@/data/neighborhoods';
 import { NEARBY_VEHICLE_MARKERS } from '@/data/nearbyVehicleMarkers';
+import { PASSENGER_SERVICES } from '@/data/services';
+import { PASSENGER_PROMOTIONS } from '@/data/promotions';
 import { cn } from '@/lib/utils';
 import type { SavedPlace } from '@/types';
 
@@ -138,6 +142,18 @@ export default function PassengerHomePage() {
     else navigate('/passenger/profile/saved-places');
   };
 
+  const handleSelectService = (service: ServiceItem) => {
+    if (service.id === 'ride') navigate('/passenger/search');
+  };
+
+  const handleSelectPromotion = (promotion: PromotionItem) => {
+    if (promotion.id === 'become-driver') navigate('/register');
+    else if (promotion.id === 'safety') navigate('/passenger/profile/security');
+    else toast('Bientôt disponible.');
+  };
+
+  const promotions = <PromotionCarousel promotions={PASSENGER_PROMOTIONS} onSelect={handleSelectPromotion} />;
+
   const quickPlaces = (
     <>
       <QuickPlaceButton icon={<Home className="h-5 w-5" />} label="Domicile" onClick={() => bookOrManage(home)} />
@@ -158,7 +174,12 @@ export default function PassengerHomePage() {
             <HeaderActions account={account} hasUnread={hasUnread} />
           </div>
           <DestinationSearchCta />
+          <div>
+            <p className="mb-2 text-body-sm font-semibold text-foreground">Nos services</p>
+            <ServiceGrid services={PASSENGER_SERVICES} onSelect={handleSelectService} compact />
+          </div>
           <div className="grid grid-cols-3 gap-3">{quickPlaces}</div>
+          {promotions}
           <Card>
             <p className="text-body-sm font-semibold text-foreground">Chauffeurs disponibles près de vous</p>
             <p className="mt-1 text-body-sm text-muted-foreground">
@@ -197,10 +218,14 @@ export default function PassengerHomePage() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        className="safe-bottom absolute inset-x-0 bottom-0 z-10 rounded-t-xl border-t border-border bg-surface p-5 shadow-sheet"
+        className="safe-bottom absolute inset-x-0 bottom-0 z-10 max-h-[75vh] overflow-y-auto rounded-t-xl border-t border-border bg-surface p-5 shadow-sheet"
       >
+        <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-border" aria-hidden="true" />
         <DestinationSearchCta className="mb-4" />
-        <div className="grid grid-cols-3 gap-3">{quickPlaces}</div>
+        <p className="mb-2 text-body-sm font-semibold text-foreground">Nos services</p>
+        <ServiceGrid services={PASSENGER_SERVICES} onSelect={handleSelectService} />
+        <div className="mt-5 grid grid-cols-3 gap-3">{quickPlaces}</div>
+        <div className="mt-5">{promotions}</div>
       </motion.div>
     </div>
   );

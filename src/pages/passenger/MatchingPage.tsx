@@ -9,6 +9,7 @@ import { useIsDesktop } from '@/hooks/useMediaQuery';
 import { CONAKRY_MAP_CENTER, getNeighborhood } from '@/data/neighborhoods';
 import { calculateFaresByCategory, getNeighborhoodPath, RIDE_CATEGORIES_CONFIG } from '@/data/pricing';
 import { pickDriverFor } from '@/data/mockDrivers';
+import { VEHICLE_CATALOG } from '@/data/vehicles';
 import { VEHICLE_COLORS } from '@/data/vehicleColors';
 import { formatFare } from '@/utils/format';
 import type { Driver, PaymentMethod, RideCategory } from '@/types';
@@ -153,7 +154,13 @@ export default function MatchingPage() {
   const foundContent = match ? (
     <div className="space-y-3">
       <div className="text-center">
-        <Badge variant="accent" className="mb-2">
+        <img
+          src={VEHICLE_CATALOG[category].image}
+          alt={VEHICLE_CATALOG[category].name}
+          className="mx-auto h-16 w-auto object-contain"
+          loading="lazy"
+        />
+        <Badge variant="accent" className="mb-2 mt-1">
           Chauffeur trouvé
         </Badge>
         <p className="font-display text-h3 text-foreground">Arrive dans {match.etaMin} min</p>

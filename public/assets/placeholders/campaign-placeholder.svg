@@ -1,0 +1,27 @@
+<svg width="640" height="360" viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#667085" />
+      <stop offset="100%" stop-color="#102A43" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#g)" />
+  <g opacity="0.5" fill="#FFFFFF">
+    <rect x="40" y="230" width="46" height="130" />
+    <rect x="100" y="180" width="46" height="180" />
+    <rect x="160" y="255" width="46" height="105" />
+    <rect x="480" y="200" width="46" height="160" />
+    <rect x="540" y="245" width="46" height="115" />
+    <rect x="580" y="170" width="46" height="190" />
+  </g>
+  <g transform="translate(272,120)" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.92">
+    
+  <path d="M58 8 L104 26 L104 56 Q104 88 58 108 Q12 88 12 56 L12 26 Z" />
+  <path d="M36 58 L52 74 L82 40" />
+  </g>
+  
+  <g transform="translate(548,20)" opacity="0.82">
+    <rect width="72" height="22" rx="11" fill="#102A43" />
+    <text x="36" y="15" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="0.5" fill="#FFFFFF">APERÇU</text>
+  </g>
+</svg>

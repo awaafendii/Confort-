@@ -70,9 +70,14 @@ import {
   MapMarkerIcon,
   MAP_MARKER_COLORS,
 } from '@/components/business';
+import { VehicleSelector } from '@/components/vehicle';
+import { ServiceGrid } from '@/components/service';
+import { PromotionCarousel } from '@/components/promotion';
 import { NEIGHBORHOODS } from '@/data/neighborhoods';
 import { calculateFaresByCategory, RIDE_CATEGORIES_CONFIG } from '@/data/pricing';
 import { VEHICLE_COLORS } from '@/data/vehicleColors';
+import { PASSENGER_SERVICES } from '@/data/services';
+import { PASSENGER_PROMOTIONS } from '@/data/promotions';
 import { formatFare } from '@/utils/format';
 import type { Ride, RideCategory, RideStatus, Driver, SavedPaymentMethod, PaymentMethod } from '@/types';
 
@@ -126,6 +131,7 @@ const NAV_SECTIONS = [
   { id: 'states', label: "États d'interface" },
   { id: 'overlays', label: 'Overlays' },
   { id: 'business', label: 'Composants métier' },
+  { id: 'mobility-visual', label: 'Phase 8 — Expérience visuelle' },
   { id: 'icons', label: 'Iconographie & logo' },
 ];
 
@@ -775,6 +781,32 @@ export default function StyleGuidePage() {
                     onSOS={() => toast.error('SOS déclenché (démonstration)')}
                   />
                 </Card>
+              </div>
+            </div>
+          </Section>
+
+          <Section
+            id="mobility-visual"
+            title="Phase 8 — Expérience visuelle"
+            description="VehicleSelector, ServiceGrid, PromotionCarousel — visuels en placeholders SVG sobres et identifiés (badge « Aperçu »), prêts à être remplacés par de vraies photos sans changer le code (config/assets.ts)."
+          >
+            <div className="space-y-8">
+              <div>
+                <p className="mb-2 text-body-sm font-semibold text-muted-foreground">VehicleSelector (image dominante, défilement horizontal)</p>
+                <VehicleSelector
+                  prices={fares}
+                  etas={{ STANDARD: '3 min', LUXE: '4 min', VIP: '5 min', MOTO_SINGLE: '2 min' }}
+                  value={category}
+                  onChange={setCategory}
+                />
+              </div>
+              <div>
+                <p className="mb-2 text-body-sm font-semibold text-muted-foreground">ServiceGrid (seul « Courses » est un vrai service branché)</p>
+                <ServiceGrid services={PASSENGER_SERVICES} onSelect={(s) => toast(`Service sélectionné : ${s.name}`)} />
+              </div>
+              <div>
+                <p className="mb-2 text-body-sm font-semibold text-muted-foreground">PromotionCarousel</p>
+                <PromotionCarousel promotions={PASSENGER_PROMOTIONS} onSelect={(p) => toast(`Campagne : ${p.title}`)} />
               </div>
             </div>
           </Section>
