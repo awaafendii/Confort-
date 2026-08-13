@@ -145,6 +145,10 @@ Phase d'audit et de renforcement (comme la Phase 11), pas de nouvelles fonctionn
 - **PWA** : `public/manifest.json` ajouté (nom, icône, `theme_color`, `display: standalone`) pour donner un sens réel à la mention « PWA-ready » de ce document — pas de service worker à ce stade, l'app n'est donc pas installable hors-ligne, seulement « manifeste correct ».
 - Parcours validé : suite de tests complète (34/34), build de production propre, navigation vers une URL inconnue → `NotFoundPage` → « Retour à l'accueil » → `RootGate` renvoie correctement vers l'espace du rôle connecté.
 
+### Mobile-first + PWA installable — ce qui a été livré
+
+*Correction de la note Phase 13 ci-dessus : ce n'est plus vrai.* `vite-plugin-pwa` génère désormais un vrai service worker (précache l'app shell + les images `public/assets/`, sans mise en cache des tuiles carte externes — pas de fausse promesse de carte hors-ligne), un manifest complet avec de vraies icônes PNG (192/512/maskable, plus `apple-touch-icon` dédié pour iOS) dérivées du logo réellement utilisé en production. L'app est installable sur écran d'accueil (Android/Chrome et iOS/Safari). Gestes tactiles (pincer-zoomer, déplacement au doigt) activés sur toutes les cartes plein écran ; `env(safe-area-inset-top/bottom)` respecté par les contrôles flottants (boutons retour, contrôles carte, pastilles de statut) en plus de la navigation basse déjà couverte.
+
 ## Stack
 
 - React 19 + TypeScript + Vite

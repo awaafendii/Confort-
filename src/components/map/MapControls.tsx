@@ -10,7 +10,7 @@ export interface MapControlsProps {
 
 const BUTTON_CLASS = 'bg-surface/95 shadow-card backdrop-blur hover:bg-surface';
 
-/** Boutons de zoom/géolocalisation superposés à la carte (MapView) — la carte de base reste souvent `interactive={false}` (pour ne pas entrer en conflit avec le geste de swipe du BottomSheet), mais l'API JS de maplibre-gl fonctionne indépendamment de ce flag. */
+/** Boutons de zoom/géolocalisation superposés à la carte (MapView) — coexistent avec les gestes tactiles natifs (pincer-zoomer, déplacement) désormais activés sur les cartes plein écran. */
 export const MapControls: React.FC<MapControlsProps> = ({ map, className }) => {
   const locate = () => {
     if (!('geolocation' in navigator)) {
@@ -25,13 +25,21 @@ export const MapControls: React.FC<MapControlsProps> = ({ map, className }) => {
           duration: 800,
         });
       },
-      () => toast('Localisation indisponible — vérifiez les autorisations.'),
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          toast('Localisation refusée — autorisez l’accès dans les réglages de votre navigateur.');
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          toast('Position indisponible pour le moment.');
+        } else {
+          toast('Délai de localisation dépassé — réessayez.');
+        }
+      },
       { enableHighAccuracy: true, timeout: 8000 }
     );
   };
 
   return (
-    <div className={className ?? 'absolute right-4 top-4 z-10 flex flex-col gap-2'}>
+    <div className={className ?? 'absolute right-4 z-10 flex flex-col gap-2 top-[max(1rem,env(safe-area-inset-top))]'}>
       <IconButton
         icon={<Plus className="h-4 w-4" />}
         aria-label="Zoomer"

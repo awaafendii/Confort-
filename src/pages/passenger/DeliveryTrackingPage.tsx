@@ -158,13 +158,12 @@ export default function DeliveryTrackingPage() {
         { id: 'dropoff', kind: 'pin', position: dropoff.coords, color: MAP_MARKER_COLORS.destination },
         { id: 'courier', kind: 'vehicle', position: sim.position, color: color.hex, vehicleType: driver.vehicle.type, rotation: sim.heading },
       ]}
-      interactive={isDesktop}
       className="h-full w-full"
     />
   );
 
   const statusPill = (
-    <div aria-live="polite" className="pointer-events-none absolute inset-x-0 top-0 flex justify-center px-4 pt-4">
+    <div aria-live="polite" className="pointer-events-none absolute inset-x-0 top-0 flex justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))]">
       <Badge variant={statusInfo.badge} className="gap-2 px-4 py-2 text-body-sm shadow-elevated backdrop-blur">
         <StatusIcon className="h-4 w-4" aria-hidden="true" />
         {statusInfo.label}

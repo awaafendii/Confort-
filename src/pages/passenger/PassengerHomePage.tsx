@@ -190,7 +190,7 @@ export default function PassengerHomePage() {
           </Card>
         </div>
         <div className="relative flex-1">
-          <MapView center={CONAKRY_MAP_CENTER} zoom={12.5} markers={NEARBY_VEHICLE_MARKERS} interactive={false} className="h-full w-full" />
+          <MapView center={CONAKRY_MAP_CENTER} zoom={12.5} markers={NEARBY_VEHICLE_MARKERS} className="h-full w-full" />
         </div>
       </div>
     );
@@ -199,7 +199,7 @@ export default function PassengerHomePage() {
   return (
     <div className="relative h-[calc(100vh-5rem)] w-full overflow-hidden">
       <div className="absolute inset-0">
-        <MapView center={CONAKRY_MAP_CENTER} zoom={12.3} markers={NEARBY_VEHICLE_MARKERS} interactive={false} className="h-full w-full" />
+        <MapView center={CONAKRY_MAP_CENTER} zoom={12.3} markers={NEARBY_VEHICLE_MARKERS} className="h-full w-full" />
       </div>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background via-background/70 to-transparent" />
 

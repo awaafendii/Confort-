@@ -135,7 +135,7 @@ export default function RideConfirmationPage() {
           {cta}
         </div>
         <div className="relative flex-1">
-          <MapView center={CONAKRY_MAP_CENTER} zoom={12.5} markers={markers} route={routeCoords} interactive={false} className="h-full w-full" />
+          <MapView center={CONAKRY_MAP_CENTER} zoom={12.5} markers={markers} route={routeCoords} className="h-full w-full" />
         </div>
       </div>
     );
@@ -144,13 +144,13 @@ export default function RideConfirmationPage() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0">
-        <MapView center={CONAKRY_MAP_CENTER} zoom={12.5} markers={markers} route={routeCoords} interactive={false} className="h-full w-full" />
+        <MapView center={CONAKRY_MAP_CENTER} zoom={12.5} markers={markers} route={routeCoords} className="h-full w-full" />
       </div>
       <IconButton
         icon={<ArrowLeft className="h-5 w-5" />}
         aria-label="Retour"
         onClick={() => navigate(-1)}
-        className="absolute left-4 top-4 z-10 bg-surface/95 shadow-card backdrop-blur hover:bg-surface"
+        className="absolute left-4 z-10 bg-surface/95 shadow-card backdrop-blur hover:bg-surface top-[max(1rem,env(safe-area-inset-top))]"
       />
 
       <BottomSheet open inline className="max-h-[85vh]">

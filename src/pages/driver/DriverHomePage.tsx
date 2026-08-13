@@ -172,6 +172,7 @@ export default function DriverHomePage() {
                   center={account.location ?? CONAKRY_MAP_CENTER}
                   zoom={12.5}
                   interactive={false}
+                  showControls={false}
                   markers={[
                     {
                       id: 'self',
@@ -306,6 +307,7 @@ function RequestCard({
               center={previewCenter}
               zoom={11.5}
               interactive={false}
+              showControls={false}
               markers={[
                 { id: 'pickup', kind: 'pin', position: pickup.coords, color: MAP_MARKER_COLORS.pickup },
                 { id: 'destination', kind: 'pin', position: destination.coords, color: MAP_MARKER_COLORS.destination },

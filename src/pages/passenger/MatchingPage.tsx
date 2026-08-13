@@ -233,7 +233,7 @@ export default function MatchingPage() {
           {overlayContent}
         </div>
         <div className="relative flex-1">
-          <MapView center={CONAKRY_MAP_CENTER} zoom={12.5} markers={markers} route={routeCoords} interactive={false} className="h-full w-full" />
+          <MapView center={CONAKRY_MAP_CENTER} zoom={12.5} markers={markers} route={routeCoords} className="h-full w-full" />
         </div>
       </div>
     );
@@ -242,7 +242,7 @@ export default function MatchingPage() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0">
-        <MapView center={origin.coords} zoom={13} markers={markers} route={routeCoords} interactive={false} className="h-full w-full" />
+        <MapView center={origin.coords} zoom={13} markers={markers} route={routeCoords} className="h-full w-full" />
       </div>
       <div aria-live="polite" className="sr-only">
         {announcement}
