@@ -134,6 +134,7 @@ export default function AdminRideDetailPage() {
           center={midpoint}
           zoom={12}
           interactive={false}
+          showControls={false}
           markers={[
             { id: 'pickup', position: ride.pickup.coords, kind: 'pin', color: MAP_MARKER_COLORS.pickup },
             { id: 'destination', position: ride.destination.coords, kind: 'pin', color: MAP_MARKER_COLORS.destination },

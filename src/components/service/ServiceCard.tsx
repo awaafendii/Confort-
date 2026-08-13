@@ -8,6 +8,8 @@ export interface ServiceItem {
   image: string;
   /** true pour les services annoncés mais pas encore branchés à un vrai flux (Phase 8 — pas de logique livraison/cargo/food/business dans l'app aujourd'hui). */
   comingSoon?: boolean;
+  /** true quand `image` contient déjà son propre libellé composé dans le visuel — n'affiche pas de texte surimposé pour éviter le doublon (même pattern que `PromotionItem.selfContained`). */
+  selfContained?: boolean;
 }
 
 export interface ServiceCardProps {
@@ -40,7 +42,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onSelect, cla
           Bientôt
         </Badge>
       )}
-      <p className="px-3 py-2.5 text-body-sm font-semibold text-foreground">{service.name}</p>
+      {/* `alt`/`aria-hidden` restent inconditionnels même si selfContained : le <button> englobant porte déjà aria-label={service.name} (ligne ~27), pas besoin de doubler l'annonce pour un lecteur d'écran. */}
+      {!service.selfContained && <p className="px-3 py-2.5 text-body-sm font-semibold text-foreground">{service.name}</p>}
     </button>
   );
 };

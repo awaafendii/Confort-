@@ -27,6 +27,7 @@ const WalletPage = lazy(() => import('@/pages/passenger/WalletPage'));
 const PaymentMethodsPage = lazy(() => import('@/pages/passenger/PaymentMethodsPage'));
 const SearchDestinationPage = lazy(() => import('@/pages/passenger/SearchDestinationPage'));
 const BookingPage = lazy(() => import('@/pages/passenger/BookingPage'));
+const RideConfirmationPage = lazy(() => import('@/pages/passenger/RideConfirmationPage'));
 const MatchingPage = lazy(() => import('@/pages/passenger/MatchingPage'));
 const TrackingPage = lazy(() => import('@/pages/passenger/TrackingPage'));
 const RideCompletedPage = lazy(() => import('@/pages/passenger/RideCompletedPage'));
@@ -145,6 +146,7 @@ export default function App() {
               <Route element={<RequirePassenger />}>
                 <Route path="/passenger/search" element={<SearchDestinationPage />} />
                 <Route path="/passenger/booking" element={<BookingPage />} />
+                <Route path="/passenger/booking/confirm" element={<RideConfirmationPage />} />
                 <Route path="/passenger/booking/matching" element={<MatchingPage />} />
                 <Route path="/passenger/tracking" element={<TrackingPage />} />
                 <Route path="/passenger/chat" element={<ChatPage />} />

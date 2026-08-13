@@ -68,7 +68,7 @@ export default function BookingPage() {
   const selectedPayment = paymentMethods.find((m) => m.id === paymentId);
 
   const confirm = () => {
-    navigate('/passenger/booking/matching', {
+    navigate('/passenger/booking/confirm', {
       state: { destinationId, category, paymentMethod: selectedPayment?.method ?? 'ESPECE' },
     });
   };
@@ -116,7 +116,7 @@ export default function BookingPage() {
 
   const cta = (
     <Button variant="primary" size="lg" className="w-full" onClick={confirm}>
-      Confirmer la course — {formatFare(fares[category])}
+      Choisir {RIDE_CATEGORIES_CONFIG[category].label} — {formatFare(fares[category])}
     </Button>
   );
 

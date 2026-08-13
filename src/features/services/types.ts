@@ -16,4 +16,6 @@ export interface ServiceDefinition {
   enabled: boolean;
   /** Route de démarrage du parcours de réservation — présent uniquement si `enabled`. */
   entryRoute?: string;
+  /** true quand `image` contient déjà son propre libellé composé dans le visuel — évite un doublon de texte (même pattern que `PromotionItem.selfContained`). */
+  selfContained?: boolean;
 }

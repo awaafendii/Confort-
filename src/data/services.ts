@@ -7,4 +7,5 @@ export const PASSENGER_SERVICES: ServiceItem[] = SERVICE_REGISTRY.map((service) 
   name: service.name,
   image: service.image,
   comingSoon: !service.enabled,
+  selfContained: service.selfContained,
 }));
